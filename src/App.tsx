@@ -19,6 +19,7 @@ import { CategoryChart } from './components/CategoryChart';
 import { CustomerChart } from './components/CustomerChart';
 import { OrdersTable } from './components/OrdersTable';
 import { SimulatorPanel } from './components/SimulatorPanel';
+import { Login } from './components/Login';
 import type { Transaction, Filters, SimulationParams, DashboardAlert } from './types/dashboard';
 import { 
   generateMockData, 
@@ -29,6 +30,11 @@ import {
 } from './utils/dataGenerator';
 
 function App() {
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    () => sessionStorage.getItem('retailpulse_auth') === 'true'
+  );
+
   // Navigation & Theme State
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -161,6 +167,28 @@ function App() {
     }
   };
 
+  // Gateway Authentication handlers
+  const handleLoginSuccess = () => {
+    sessionStorage.setItem('retailpulse_auth', 'true');
+    setIsAuthenticated(true);
+    if (showNotifications) {
+      setAlerts(prev => [
+        {
+          id: Date.now().toString(),
+          type: 'success',
+          message: 'Gateway Authenticated: Welcome Admin.',
+          time: 'Just now'
+        },
+        ...prev
+      ]);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('retailpulse_auth');
+    setIsAuthenticated(false);
+  };
+
   // 1. Process Global Filters
   const filteredTransactions = useMemo(() => {
     return filterTransactions(rawTransactions, filters);
@@ -257,6 +285,10 @@ function App() {
     return `${currencySymbol}${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
   };
 
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className={`app-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Sidebar 
@@ -265,6 +297,7 @@ function App() {
         collapsed={sidebarCollapsed} 
         setCollapsed={setSidebarCollapsed}
         alerts={alerts}
+        onLogout={handleLogout}
       />
 
       <div className="main-content">
@@ -632,6 +665,7 @@ function App() {
                   onChange={(e) => setCurrencySymbol(e.target.value)}
                 >
                   <option value="$">USD - Dollar ($)</option>
+                  <option value="₹">INR - Indian Rupee (₹)</option>
                   <option value="€">EUR - Euro (€)</option>
                   <option value="£">GBP - Pound (£)</option>
                   <option value="¥">JPY - Yen (¥)</option>

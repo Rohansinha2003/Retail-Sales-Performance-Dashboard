@@ -9,7 +9,8 @@ import {
   CheckCircle, 
   Info,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 import type { DashboardAlert } from '../types/dashboard';
 
@@ -19,6 +20,7 @@ interface SidebarProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   alerts: DashboardAlert[];
+  onLogout: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,7 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab,
   collapsed,
   setCollapsed,
-  alerts
+  alerts,
+  onLogout
 }) => {
   const menuItems = [
     { id: 'overview', name: 'Overview', icon: LayoutDashboard },
@@ -69,11 +72,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
 
+        {/* Logout button */}
+        <button
+          onClick={onLogout}
+          className="menu-item"
+          style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', borderRadius: 0, paddingLeft: '1.2rem', color: 'var(--color-danger)' }}
+          title="Sign Out"
+        >
+          <LogOut size={18} />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
+
         {/* Collapsible toggle */}
         <button 
           onClick={() => setCollapsed(!collapsed)}
           className="menu-item"
-          style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', borderRadius: 0, paddingLeft: '1.2rem' }}
+          style={{ borderRadius: 0, paddingLeft: '1.2rem' }}
           title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
